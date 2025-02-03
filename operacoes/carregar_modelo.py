@@ -3,6 +3,7 @@ from prophet import Prophet
 import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
+from operacoes.carregar_tabela import carregar_base_dados
 import xgboost as xgb
 import joblib
 import matplotlib.pyplot as plt
@@ -10,12 +11,15 @@ import seaborn as sns
 from datetime import datetime, date
 
 import streamlit as st
+
+
 @st.cache_data
 # Função para carregar os dados e treinar os modelos
 def carregar_e_treinar_modelos():
     try:
-        df = pd.read_csv("dados/dados_petroleo_brent_2005_2025.csv")
-        print("Arquivo carregado com sucesso!")
+        df = carregar_base_dados()
+        print("Tabela carregada com sucesso!")
+        
     except Exception as e:
         st.error(f"Erro ao carregar o arquivo: {e}")
         raise
