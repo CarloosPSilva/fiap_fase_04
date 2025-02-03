@@ -1,8 +1,11 @@
 import streamlit as st
 from PIL import Image
 import pandas as pd
+
+
 from operacoes.app_estrategia_deploy import detalhe_deploy
 from operacoes.app_modelo_previsao import modelo_de_previsao
+from operacoes.carregar_tabela import carregar_base_dados
 from operacoes.utils import style
 from operacoes.app_detalhe_previsao import detalhe_previsao
 from operacoes.app_analise_historica import analises_historicas
@@ -109,8 +112,7 @@ if choice == "🏠 Visão Geral":
 
 
 elif choice == "📊 Análises Históricas":
-    df = pd.read_csv("dados/dados_petroleo_brent_2005_2025.csv")
-    df["Data"] = pd.to_datetime(df["Data"])
+    df = carregar_base_dados()
     analises_historicas(df)
 
 elif choice == "🤖 Modelo de Previsão":
