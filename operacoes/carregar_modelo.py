@@ -124,8 +124,8 @@ def carregar_e_treinar_modelos():
     model_xgb.fit(X_train, y_train)
 
     # Salvar os modelos treinados
-    joblib.dump(prophet, "modelo/modelo_prophet.pkl")  # Salvar o modelo Prophet
-    joblib.dump(model_xgb, "modelo/modelo_xgboost.pkl")   # Salvar o modelo XGBoost
+    # joblib.dump(prophet, "modelo/modelo_prophet.pkl")  # Salvar o modelo Prophet
+    # joblib.dump(model_xgb, "modelo/modelo_xgboost.pkl")   # Salvar o modelo XGBoost
     # st.success("Modelos salvos com sucesso!")
 
     return df, prophet, model_xgb, test, prophet_future
