@@ -1,6 +1,0 @@
-[theme]
-primaryColor = "#161616"  # Vermelho FIAP Suave
-backgroundColor = "#000000"  # Fundo preto lado direito
-secondaryBackgroundColor = "#D7263D"  # Cor no menu lateral efeito houver
-textColor = "#FFFFFF"  # Preto suave para legibilidade
-font = "sans serif"
