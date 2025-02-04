@@ -70,3 +70,4 @@ elif choice == "🚀 Estratégia de Deploy":
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Desenvolvido por Carlos Pereira Silva**")
+

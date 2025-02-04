@@ -232,6 +232,7 @@ def analises_historicas(df):
     - Picos de frequência indicam preços mais comuns, enquanto caudas longas refletem períodos de alta volatilidade.
     - Este gráfico ajuda a entender a dispersão dos preços ao longo do tempo.
     """
+    
     )
     st.markdown("---")
 
