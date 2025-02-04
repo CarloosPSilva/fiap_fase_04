@@ -20,13 +20,13 @@ def carregar_e_treinar_modelos():
     try:
         # Tenta carregar os dados do arquivo local
         df = pd.read_csv("dados/dados_petroleo_brent_2005_2025.csv")
-        st.success("✅ Dados carregados com sucesso do arquivo local.")
+        # st.success("✅ Dados carregados com sucesso do arquivo local.")
     
     except FileNotFoundError:
         st.warning("⚠️ Arquivo local não encontrado. Tentando carregar da base de dados online...")
         try:
             df = carregar_base_dados()
-            st.success("✅ Dados carregados com sucesso da base de dados online.")
+            # st.success("✅ Dados carregados com sucesso da base de dados online.")
         except Exception as e:
             st.error(f"❌ Erro ao carregar os dados online: {e}")
             return None, None, None, None, None
@@ -121,7 +121,7 @@ def carregar_e_treinar_modelos():
     # Salvar os modelos treinados
     joblib.dump(prophet, modelo_prophet_path)
     joblib.dump(model_xgb, modelo_xgb_path)
-    print(f"✅ Modelos salvos com sucesso em: {modelo_dir}")
+    # print(f"✅ Modelos salvos com sucesso em: {modelo_dir}")
 
     return df, prophet, model_xgb, test, prophet_future
 

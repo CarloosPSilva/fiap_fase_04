@@ -38,7 +38,7 @@ def carregar_base_dados():
                 # Salvar o arquivo CSV no diretório "dados/"
                 caminho_arquivo = os.path.join(diretorio_dados, "dados_petroleo_brent_2005_2025.csv")
                 df.to_csv(caminho_arquivo, index=False, encoding="utf-8")
-                st.success(f"✅ Dados salvos em {caminho_arquivo}")
+                # st.success(f"✅ Dados salvos em {caminho_arquivo}")
 
                 return df
 

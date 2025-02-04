@@ -31,13 +31,13 @@ def analises_historicas(df):
         x="Data",
         y="Preço (US$)",
         title="Evolução do Preço do Petróleo Brent com Eventos Geopolíticos",
-        color_discrete_sequence=["#D7263D"],
+        # color_discrete_sequence=["#0047AB"],
     )
 
     eventos = {
-        "2008-09-15": ("Crise Financeira 2008", "yellow"),
-        "2020-03-01": ("COVID-19", "blue"),
-        "2022-02-24": ("Guerra Ucrânia", "green"),
+        "2008-09-15": ("Crise Financeira 2008", "#C70039"),
+        "2020-03-01": ("COVID-19", "#0000FF"),
+        "2022-02-24": ("Guerra Ucrânia", "#2CA02C"),
     }
 
     for data, (texto, cor) in eventos.items():
@@ -47,6 +47,7 @@ def analises_historicas(df):
             y=df["Preço (US$)"].max(),
             text=texto,
             showarrow=True,
+            
             arrowhead=2,
             font=dict(color=cor),
         )
@@ -54,6 +55,7 @@ def analises_historicas(df):
     fig1.update_layout(
         xaxis_title="Ano",
         yaxis_title="Preço (US$)",
+        plot_bgcolor="#F8F8F8",  # Fundo do gráfico com tom cinza claro
         hovermode="x unified",
         template="plotly_dark",
     )
@@ -83,14 +85,14 @@ def analises_historicas(df):
         title="Variação Percentual Mensal do Preço do Petróleo",
         line_shape="spline",
         template="plotly_dark",
-        color_discrete_sequence=["#D7263D"],  # Vermelho FIAP
+        # color_discrete_sequence=["#D7263D"],  # Vermelho FIAP
     )
 
-    fig2.add_hline(y=0, line_dash="dash", line_color="gray")
+    fig2.add_hline(y=0, line_dash="dash", line_color="red")
 
     # Ajustando layout para melhor visualização
     fig2.update_layout(
-        xaxis_title="Ano", yaxis_title="Variação (%)", hovermode="x unified"
+        xaxis_title="Ano", yaxis_title="Variação (%)", hovermode="x unified", plot_bgcolor="#F8F8F8",  # Fundo do gráfico com tom cinza claro
     )
 
     st.plotly_chart(fig2, use_container_width=True)
@@ -119,13 +121,13 @@ def analises_historicas(df):
         x="Ano",
         y="Preço (US$)",
         title="Preço Médio Anual do Petróleo com Destaque para Crises",
-        color_discrete_sequence=["#D7263D"],  # Cor das barras
+        # color_discrete_sequence=["#D7263D"],  # Cor das barras
     )
 
     eventos = {
-        2008: ("Crise Financeira 2008", "#FFD700"),  # Amarelo
-        2020: ("COVID-19", "#1E90FF"),  # Azul
-        2022: ("Guerra Ucrânia", "#32CD32"),  # Verde
+        2008: ("Crise Financeira 2008", "#C70039"),  # Amarelo
+        2020: ("COVID-19", "#0000FF"),  # Azul
+        2022: ("Guerra Ucrânia", "#2CA02C"),  # Verde
     }
 
     for ano, (evento, cor) in eventos.items():
@@ -141,7 +143,7 @@ def analises_historicas(df):
         )
 
     fig3.update_layout(
-        xaxis_title="Ano", yaxis_title="Preço Médio (US$)", template="plotly_dark"
+        xaxis_title="Ano", yaxis_title="Preço Médio (US$)", template="plotly_dark", plot_bgcolor="#F8F8F8",  # Fundo do gráfico com tom cinza claro
     )
 
     st.plotly_chart(fig3, use_container_width=True)
@@ -168,12 +170,12 @@ def analises_historicas(df):
         x="Data",
         y="Preço (US$)",
         title="Preço do Petróleo Antes e Após a Crise de 2008",
-        color_discrete_sequence=["#D7263D"],
+        # color_discrete_sequence=["#D7263D"],
     )
 
     # Adicionar linha vertical e anotação para a crise de 2008
     fig4.add_vline(
-        x=pd.Timestamp("2008-09-15"), line_dash="dash", line_color="#FFD700"
+        x=pd.Timestamp("2008-09-15"), line_dash="dash", line_color="#C70039"
     )  # Amarelo
     fig4.add_annotation(
         x=pd.Timestamp("2008-09-15"),
@@ -181,11 +183,11 @@ def analises_historicas(df):
         text="Crise 2008",
         showarrow=True,
         arrowhead=2,
-        font=dict(color="#FFD700", size=12),
+        font=dict(color="#C70039", size=12),
     )
 
     fig4.update_layout(
-        xaxis_title="Ano", yaxis_title="Preço (US$)", template="plotly_dark"
+        xaxis_title="Ano", yaxis_title="Preço (US$)", template="plotly_dark", plot_bgcolor="#F8F8F8",  # Fundo do gráfico com tom cinza claro
     )
 
     st.plotly_chart(fig4, use_container_width=True)
@@ -202,16 +204,25 @@ def analises_historicas(df):
 
     # 5. Distribuição dos preços
     st.header("📊 Distribuição dos Preços")
+
     fig5 = px.histogram(
         df,
         x="Preço (US$)",
         nbins=30,
         title="Distribuição dos Preços do Petróleo Brent",
-        color_discrete_sequence=["#D7263D"],
     )
+
+    # Adicionando borda preta nas barras
+    fig5.update_traces(marker=dict(line=dict(color="black", width=1)))
+
+    # Personalizando layout
     fig5.update_layout(
-        xaxis_title="Preço (US$)", yaxis_title="Frequência", template="plotly_dark"
+        xaxis_title="Preço (US$)",
+        yaxis_title="Frequência",
+        template="plotly_white",  # Fundo branco para melhor contraste
+        plot_bgcolor="#F8F8F8",  # Fundo do gráfico com tom cinza claro
     )
+
     st.plotly_chart(fig5, use_container_width=True)
 
     st.write(
@@ -225,6 +236,4 @@ def analises_historicas(df):
     st.markdown("---")
 
 
-# Exemplo de uso
-if __name__ == "__main__":
-    df = pd.read_csv("dados_petroleo_brent_2005_2025.csv")
+
