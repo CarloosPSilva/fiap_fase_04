@@ -58,7 +58,7 @@ elif choice == "📊 Análises Históricas":
     # df = pd.read_csv("dados/dados_petroleo_brent_2005_2025.csv")
     analises_historicas(df)
 
-elif choice == "🤖 Modelo de Previsão":
+elif choice == "🤖 Informações do Modelo":
     detalhe_previsao()
 
 elif choice == "📈 Resultados e Predições":

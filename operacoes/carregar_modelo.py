@@ -78,13 +78,13 @@ def carregar_e_treinar_modelos():
         df = df.drop_duplicates(subset=["ds"])
 
     # Renomear as colunas de forma clara e estruturada
-    df.rename(columns={"ds": "Data", "y": "Preço Real", "yhat": "Preço Previsto", "yhat_lower": "Intervalo Inferior", "yhat_upper": "Intervalo Superior"}, inplace=True)
+    df.rename(columns={"ds": "Data", "y": "Preço Real", "yhat": "US$ Preço Previsto", "yhat_lower": "Intervalo Inferior", "yhat_upper": "Intervalo Superior"}, inplace=True)
 
     # Remover colunas duplicadas após a renomeação
     df = df.loc[:, ~df.columns.duplicated()]
 
     # Calcular resíduos (erros) do Prophet
-    df["Resíduo"] = df["Preço Real"] - df["Preço Previsto"]
+    df["Resíduo"] = df["Preço Real"] - df["US$ Preço Previsto"]
 
     # Criar features para o modelo XGBoost
     for i in range(1, 8):  # Criar lags de 1 a 7 dias
@@ -121,7 +121,7 @@ def carregar_e_treinar_modelos():
     # Salvar os modelos treinados
     joblib.dump(prophet, modelo_prophet_path)
     joblib.dump(model_xgb, modelo_xgb_path)
-    # print(f"✅ Modelos salvos com sucesso em: {modelo_dir}")
+    print(f"✅ Modelos salvos com sucesso em: {modelo_dir}")
 
     return df, prophet, model_xgb, test, prophet_future
 
@@ -174,11 +174,11 @@ def criar_tabela_previsoes(data_inicio, dias_futuros, df_inicial):
     residuo_previsto = model_xgb.predict(features_xgb)[0]
 
     # Ajustar as previsões do Prophet com o resíduo previsto
-    future_df["Preço Previsto Ajustado"] = future_df["yhat"] + residuo_previsto
-    future_df["Preço Previsto Ajustado Inferior"] = (
+    future_df["US$ Preço Previsto Ajustado"] = future_df["yhat"] + residuo_previsto
+    future_df["US$ Preço Previsto Ajustado Inferior"] = (
         future_df["yhat_lower"] + residuo_previsto
     )
-    future_df["Preço Previsto Ajustado Superior"] = (
+    future_df["US$ Preço Previsto Ajustado Superior"] = (
         future_df["yhat_upper"] + residuo_previsto
     )
 
@@ -186,9 +186,9 @@ def criar_tabela_previsoes(data_inicio, dias_futuros, df_inicial):
     future_df.rename(
         columns={
             "ds": "Data",
-            "Preço Previsto Ajustado": "Preço Previsto",
-            "Preço Previsto Ajustado Inferior": "Intervalo Inferior (95%)",
-            "Preço Previsto Ajustado Superior": "Intervalo Superior (95%)",
+            "US$ Preço Previsto Ajustado": "US$ Preço Previsto",
+            "US$ Preço Previsto Ajustado Inferior": "US$ Estimativa de Preço Mínima",
+            "US$ Preço Previsto Ajustado Superior": "US$ Estimativa de Preço Máxima",
         },
         inplace=True,
     )
@@ -203,9 +203,9 @@ def criar_tabela_previsoes(data_inicio, dias_futuros, df_inicial):
     tabela_previsoes = future_df[
         [
             "Data",
-            "Preço Previsto",
-            "Intervalo Inferior (95%)",
-            "Intervalo Superior (95%)",
+            "US$ Preço Previsto",
+            "US$ Estimativa de Preço Mínima",
+            "US$ Estimativa de Preço Máxima",
         ]
     ]
 
