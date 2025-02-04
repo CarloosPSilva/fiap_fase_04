@@ -40,7 +40,7 @@ def detalhe_previsao():
     - 💰 Fatores econômicos
     - 🛢️ Eventos climáticos e desastres naturais
 
-    Para auxiliar na tomada de decisões, desenvolvemos um modelo de previsão que combina técnicas de **Machine Learning** e **Análise de Séries Temporais**.
+    Para auxiliar na tomada de decisões, desenvolvi o modelo de previsão que combina técnicas de **Machine Learning** e **Análise de Séries Temporais**.
     """
     )
 
