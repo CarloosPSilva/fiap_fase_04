@@ -39,7 +39,7 @@ st.sidebar.markdown("## **MENU NAVEGAÇÃO**")
 menu = [
     "🏠 Visão Geral",
     "📊 Análises Históricas",
-    "🤖 Modelo de Previsão",
+    "🤖 Informações do Modelo",
     "📈 Resultados e Predições",
     "🚀 Estratégia de Deploy",
 ]
