@@ -9,8 +9,7 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime, date
-import os
-import joblib
+
 import streamlit as st
 
 
@@ -20,13 +19,15 @@ def carregar_e_treinar_modelos():
     try:
         df = carregar_base_dados()
         print("Tabela carregada com sucesso!")
+        
     except Exception as e:
-        try:
-            df = pd.read_csv("dados/dados_petroleo_brent_2005_2025.csv")
-            print("Erro ao acessar API. Carregando arquivo local...")
-        except FileNotFoundError:
-            st.error("Erro: Nenhuma fonte de dados disponível (API e arquivo local falharam).")
-            return None, None, None, None, None
+        st.error(f"Erro ao carregar o arquivo: {e}")
+        raise
+
+    # Verificar colunas esperadas
+    if "Data" not in df.columns or "Preço (US$)" not in df.columns:
+        st.error("O arquivo CSV deve conter as colunas 'Data' e 'Preço (US$)'.")
+        return None, None, None
 
     # Converter colunas para os tipos corretos
     df["ds"] = pd.to_datetime(df["Data"], errors="coerce")  # Converte para datetime
@@ -122,21 +123,9 @@ def carregar_e_treinar_modelos():
     )
     model_xgb.fit(X_train, y_train)
 
-    # Diretório base onde os modelos serão salvos
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modelo"))
-
-    # Criar diretório caso não exista
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir)
-
-    # Caminho dos modelos
-    modelo_prophet_path = os.path.join(base_dir, "modelo_prophet.pkl")
-    modelo_xgb_path = os.path.join(base_dir, "modelo_xgboost.pkl")
-
-    # Salvar os modelos
-    joblib.dump(prophet, modelo_prophet_path)
-    joblib.dump(model_xgb, modelo_xgb_path)
-    print(f"Modelos salvos em: {base_dir}")
+    # Salvar os modelos treinados
+    joblib.dump(prophet, "../modelo/modelo_prophet.pkl")  # Salvar o modelo Prophet
+    joblib.dump(model_xgb, "../modelo/modelo_xgboost.pkl")   # Salvar o modelo XGBoost
     # st.success("Modelos salvos com sucesso!")
 
     return df, prophet, model_xgb, test, prophet_future
@@ -152,18 +141,10 @@ def criar_tabela_previsoes(data_inicio, dias_futuros, df_inicial):
     :param dias_futuros: Número de dias para prever no futuro.
     :param df_inicial: DataFrame inicial com os dados históricos.
     :return: DataFrame com as previsões.
-    # Obter o diretório do script atual"""
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modelo"))
-
-
-    modelo_prophet_path = os.path.join(base_dir, "modelo_prophet.pkl")
-    modelo_xgb_path = os.path.join(base_dir, "modelo_xgboost.pkl")
-
-
+    """
     # Carregar os modelos salvos
-    # Carregar os modelos
-    prophet = joblib.load(modelo_prophet_path)
-    model_xgb = joblib.load(modelo_xgb_path)
+    prophet = joblib.load("../modelo/modelo_prophet.pkl")
+    model_xgb = joblib.load("../modelo/modelo_xgboost.pkl")
 
     # Criar DataFrame com as datas futuras
     datas_futuras = pd.date_range(start=data_inicio, periods=dias_futuros, freq="D")
