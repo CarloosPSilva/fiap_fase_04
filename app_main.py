@@ -17,7 +17,7 @@ st.set_page_config(
     menu_items={"About": "Desenvolvido por Carlos Silva"},
 )
 
-style()
+# style()
 
 img = Image.open("imagens/tx1.png")
 
