@@ -22,7 +22,7 @@ def modelo_de_previsao():
     ultima_data_real = df["Data"].max()
     future_df = prophet_future[prophet_future["ds"] > ultima_data_real][
         ["ds", "yhat"]
-    ].rename(columns={"ds": "Data", "yhat": "Preço Previsto"})
+    ].rename(columns={"ds": "Data", "yhat": "US$ Preço Previsto"})
 
     df_completo = pd.concat([df, future_df]).reset_index(drop=True)
 
@@ -34,16 +34,16 @@ def modelo_de_previsao():
 
     anos_marcados = list(range(2005, 2027))
 
-    st.write("### Gráfico de Preço Real vs. Preço Previsto")
+    st.write("### Gráfico de Preço Real vs. US$ Preço Previsto")
     fig1 = px.line(
         df_completo,
         x="Data",
-        y=["Preço Real", "Preço Previsto"],
+        y=["Preço Real", "US$ Preço Previsto"],
         labels={"value": "Preço (US$)", "variable": "Legenda"},
-        title="Preço Real vs. Preço Previsto",
+        title="Preço Real vs. US$ Preço Previsto",
         color_discrete_map={
             "Preço Real": "#D7263D",
-            "Preço Previsto": "blue",
+            "US$ Preço Previsto": "blue",
         },
     )
 
@@ -99,16 +99,16 @@ def modelo_de_previsao():
         fig2.add_trace(
             go.Scatter(
                 x=tabela_previsoes["Data"],
-                y=tabela_previsoes["Preço Previsto"],
+                y=tabela_previsoes["US$ Preço Previsto"],
                 mode="lines",
-                name="Preço Previsto",
+                name="US$ Preço Previsto",
                 line=dict(color="blue", width=2),
             )
         )
         fig2.add_trace(
             go.Scatter(
                 x=tabela_previsoes["Data"],
-                y=tabela_previsoes["Intervalo Superior (95%)"],
+                y=tabela_previsoes["US$ Estimativa de Preço Máxima"],
                 fill=None,
                 mode="lines",
                 line=dict(width=0),
@@ -118,7 +118,7 @@ def modelo_de_previsao():
         fig2.add_trace(
             go.Scatter(
                 x=tabela_previsoes["Data"],
-                y=tabela_previsoes["Intervalo Inferior (95%)"],
+                y=tabela_previsoes["US$ Estimativa de Preço Mínima"],
                 fill="tonexty",
                 mode="lines",
                 line=dict(width=0),

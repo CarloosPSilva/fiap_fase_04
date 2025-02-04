@@ -1,142 +1,148 @@
 import streamlit as st
-from datetime import datetime, date
-import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
-from operacoes.carregar_modelo import carregar_e_treinar_modelos, criar_tabela_previsoes
 
 
-def modelo_de_previsao():
-    st.title("🛢️ Projeções do Preço do Petróleo 🔮")
+def detalhe_previsao():
+    st.title("📊 Detalhe do Modelo de Previsão")
     st.write(
-        "Explore as previsões do modelo para o preço do petróleo Brent nos próximos dias e anos, com análise detalhada das tendências."
+        """
+    **Detalhamento do modelo de Machine Learning utilizado para prever o preço do petróleo Brent.**
+    """
     )
 
-    # Carregar e treinar os modelos
-    df, prophet, model_xgb, test, prophet_future = carregar_e_treinar_modelos()
-
-    # Converter as colunas para datetime
-    df["Data"] = pd.to_datetime(df["Data"])
-    prophet_future["ds"] = pd.to_datetime(prophet_future["ds"])
-
-    ultima_data_real = df["Data"].max()
-    future_df = prophet_future[prophet_future["ds"] > ultima_data_real][
-        ["ds", "yhat"]
-    ].rename(columns={"ds": "Data", "yhat": "US$ Preço Previsto"})
-
-    df_completo = pd.concat([df, future_df]).reset_index(drop=True)
-
-    if "data_inicio" not in st.session_state:
-        st.session_state["data_inicio"] = date.today()
-
-    if "dias_futuros" not in st.session_state:
-        st.session_state["dias_futuros"] = 30
-
-    anos_marcados = list(range(2005, 2027))
-
-    st.write("### Gráfico de Preço Real vs. US$ Preço Previsto")
-    fig1 = px.line(
-        df_completo,
-        x="Data",
-        y=["Preço Real", "US$ Preço Previsto"],
-        labels={"value": "Preço (US$)", "variable": "Legenda"},
-        title="Preço Real vs. US$ Preço Previsto",
-        color_discrete_map={
-            "Preço Real": "#D7263D",
-            "US$ Preço Previsto": "blue",
-        },
+    st.markdown("---")
+    st.header("📏 Métricas de Desempenho")
+    st.write(
+        """
+    Abaixo estão as métricas de desempenho do modelo ajustado:
+    """
     )
 
-    fig1.update_layout(
-        xaxis_title="Data",
-        yaxis_title="Preço (US$)",
-        legend_title="Legenda",
-        hovermode="x unified",
-        xaxis=dict(
-            tickmode="array",
-            tickvals=pd.to_datetime([f"{ano}-01-01" for ano in anos_marcados]),
-            tickformat="%Y",
-        ),
+    # Valores das métricas
+    rmse_ajustado = 5.346641716678905
+    mae_ajustado = 2.7844824427972106
+    mape_ajustado = 5.854750854854621
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric(label="RMSE", value=f"{rmse_ajustado:.2f}")
+    with col2:
+        st.metric(label="MAE", value=f"{mae_ajustado:.2f}")
+    with col3:
+        st.metric(label="MAPE", value=f"{mape_ajustado:.2f}%")
+    st.markdown("---")
+
+    st.header("🎯 Analise do Modelo")
+    st.write(
+        """
+    O preço do petróleo Brent é altamente volátil e influenciado por diversos fatores, como:
+    - 🌍 Geopolítica global
+    - 📈 Demanda e oferta
+    - 💰 Fatores econômicos
+    - 🛢️ Eventos climáticos e desastres naturais
+
+    Para auxiliar na tomada de decisões, desenvolvemos um modelo de previsão que combina técnicas de **Machine Learning** e **Análise de Séries Temporais**.
+    """
     )
 
-    st.plotly_chart(fig1)
+    st.markdown("---")
 
-    data_limite = date(2026, 12, 31)
-
-    data_inicio = st.date_input(
-        "📅 Selecione a data inicial para as previsões:",
-        min_value=date.today(),
-        max_value=data_limite,
-        value=st.session_state["data_inicio"],
+    st.header("⚙️ Como o Modelo Funciona")
+    st.write(
+        """
+    O modelo utiliza uma abordagem híbrida, combinando duas técnicas principais:
+    """
     )
 
-    st.session_state["data_inicio"] = data_inicio
-    
-    dias_maximos = (data_limite - data_inicio).days
+    st.subheader("1. Prophet (Facebook)")
+    st.write(
+        """
+    - **Prophet** é uma ferramenta de previsão de séries temporais desenvolvida pelo Facebook.
+    - Ele é capaz de capturar tendências, sazonalidades e feriados automaticamente.
+    - No nosso modelo, o Prophet é usado para gerar uma previsão inicial do preço do petróleo.
+    """
+    )
 
-    dias_futuros = st.number_input(
-        "Número de dias para prever:",
-        min_value=1,
-        max_value=dias_maximos,
-        value=st.session_state["dias_futuros"],
+    st.subheader("2. XGBoost (Extreme Gradient Boosting)")
+    st.write(
+        """
+    - **XGBoost** é um algoritmo de Machine Learning baseado em árvores de decisão.
+    - Ele é usado para corrigir os resíduos (erros) da previsão do Prophet.
+    - Isso melhora a precisão do modelo, especialmente em cenários complexos.
+    """
+    )
+
+    st.markdown("---")
+
+    st.header("📂 Fluxo do Modelo")
+    st.write(
+        """
+    O modelo segue os seguintes passos:
+    """
+    )
+
+    st.subheader("1. Pré-processamento dos Dados")
+    st.write(
+        """
+    - 📅 Criação de features de calendário (ano, mês, dia, dia da semana).
+    - 📊 Cálculo da média móvel de 12 meses como baseline.
+    - 🧹 Tratamento de valores ausentes e outliers.
+    """
+    )
+
+    st.subheader("2. Treinamento do Prophet")
+    st.write(
+        """
+    - O Prophet é treinado com os dados históricos de preço do petróleo.
+    - Ele gera previsões iniciais e intervalos de confiança.
+    """
+    )
+
+    st.subheader("3. Cálculo dos Resíduos")
+    st.write(
+        """
+    - Os resíduos (diferença entre o valor real e a previsão do Prophet) são calculados.
+    - Esses resíduos são usados como alvo para o modelo XGBoost.
+    """
+    )
+
+    st.subheader("4. Treinamento do XGBoost")
+    st.write(
+        """
+    - O XGBoost é treinado para prever os resíduos com base em features como:
+        - Lags dos resíduos (valores passados).
+        - Features de calendário.
+    """
+    )
+
+    st.subheader("5. Previsão Final")
+    st.write(
+        """
+    - A previsão final é a soma da previsão do Prophet e da correção feita pelo XGBoost.
+    - Isso resulta em uma previsão mais precisa e robusta.
+    """
+    )
+
+    st.markdown("---")
+
+    st.header("🚀 Como Usar o Modelo")
+    st.write(
+        """
+    - O modelo pode ser usado para prever o preço do petróleo Brent em datas futuras.
+    - Basta carregar os dados históricos e executar o pipeline de previsão.
+    - As previsões são salvas em um arquivo CSV para análise posterior.
+    """
+    )
+
+    st.markdown("---")
+
+    st.header("🎉 Conclusão")
+    st.write(
+        """
+    Este modelo combina a robustez do Prophet para capturar padrões temporais com a capacidade do XGBoost de corrigir erros.
+    O resultado é uma previsão mais precisa e confiável, que pode ser usada para auxiliar na tomada de decisões estratégicas.
+    """
     )
 
 
-    st.session_state["dias_futuros"] = dias_futuros
-    
-    if dias_futuros > dias_maximos:
-        st.warning(f"O número máximo de dias permitido é {dias_maximos}. Selecione um valor dentro do limite.")
-
-    try:
-        tabela_previsoes = criar_tabela_previsoes(
-            data_inicio.strftime("%Y-%m-%d"), dias_futuros, df
-        )
-        st.write("### Tabela de Previsões Futuras")
-        st.dataframe(tabela_previsoes, height=400, use_container_width=True)
-
-        st.write("### Gráfico de Previsões Futuras")
-        fig2 = go.Figure()
-        fig2.add_trace(
-            go.Scatter(
-                x=tabela_previsoes["Data"],
-                y=tabela_previsoes["US$ Preço Previsto"],
-                mode="lines",
-                name="US$ Preço Previsto",
-                line=dict(color="blue", width=2),
-            )
-        )
-        fig2.add_trace(
-            go.Scatter(
-                x=tabela_previsoes["Data"],
-                y=tabela_previsoes["US$ Estimativa de Preço Máxima"],
-                fill=None,
-                mode="lines",
-                line=dict(width=0),
-                showlegend=False,
-            )
-        )
-        fig2.add_trace(
-            go.Scatter(
-                x=tabela_previsoes["Data"],
-                y=tabela_previsoes["US$ Estimativa de Preço Mínima"],
-                fill="tonexty",
-                mode="lines",
-                line=dict(width=0),
-                name="Intervalo de Confiança (95%)",
-                fillcolor="rgba(128, 128, 128, 0.3)",
-            )
-        )
-        fig2.update_layout(
-            title="Previsões Futuras do Preço do Petróleo",
-            xaxis_title="Data",
-            yaxis_title="Preço (US$)",
-            hovermode="x unified",
-        )
-        st.plotly_chart(fig2)
-    except Exception as e:
-        st.error(f"Erro ao criar previsões: {e}")
-
-
-# Executar a função principal
 if __name__ == "__main__":
-    modelo_de_previsao()
+    detalhe_previsao()
