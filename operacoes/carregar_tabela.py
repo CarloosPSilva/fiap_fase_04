@@ -2,6 +2,7 @@ import requests
 import streamlit as st
 import pandas as pd
 from bs4 import BeautifulSoup
+import os
 
 def carregar_base_dados():
     url = "http://www.ipeadata.gov.br/ExibeSerie.aspx?module=m&serid=1650971490&oper=view"
