@@ -9,7 +9,7 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime, date
-
+import os
 import streamlit as st
 
 
@@ -17,29 +17,31 @@ import streamlit as st
 # Função para carregar os dados e treinar os modelos
 def carregar_e_treinar_modelos():
     try:
-        df = carregar_base_dados()
-        print("Tabela carregada com sucesso!")
-        
-    except Exception as e:
-        st.error(f"Erro ao carregar o arquivo: {e}")
-        raise
+        # Tenta carregar os dados do arquivo local
+        df = pd.read_csv("dados/dados_petroleo_brent_2005_2025.csv")
+        st.success("✅ Dados carregados com sucesso do arquivo local.")
+    
+    except FileNotFoundError:
+        st.warning("⚠️ Arquivo local não encontrado. Tentando carregar da base de dados online...")
+        try:
+            df = carregar_base_dados()
+            st.success("✅ Dados carregados com sucesso da base de dados online.")
+        except Exception as e:
+            st.error(f"❌ Erro ao carregar os dados online: {e}")
+            return None, None, None, None, None
 
     # Verificar colunas esperadas
     if "Data" not in df.columns or "Preço (US$)" not in df.columns:
         st.error("O arquivo CSV deve conter as colunas 'Data' e 'Preço (US$)'.")
-        return None, None, None
+        return None, None, None, None, None
 
     # Converter colunas para os tipos corretos
     df["ds"] = pd.to_datetime(df["Data"], errors="coerce")  # Converte para datetime
-    df["y"] = pd.to_numeric(
-        df["Preço (US$)"], errors="coerce"
-    )  # Converte para numérico
+    df["y"] = pd.to_numeric(df["Preço (US$)"], errors="coerce")  # Converte para numérico
 
     # Verificar valores ausentes
     if df["ds"].isnull().any() or df["y"].isnull().any():
-        st.warning(
-            "Atenção: Há valores ausentes nas colunas 'Data' ou 'Preço (US$)'. Preenchendo valores ausentes..."
-        )
+        st.warning("⚠️ Atenção: Há valores ausentes nas colunas 'Data' ou 'Preço (US$)'. Preenchendo valores ausentes...")
         df["ds"].fillna(method="ffill", inplace=True)  # Preenche datas ausentes
         df["y"].fillna(method="ffill", inplace=True)  # Preenche preços ausentes
 
@@ -48,7 +50,7 @@ def carregar_e_treinar_modelos():
 
     # Verificar e remover duplicatas na coluna 'ds' (Data)
     if df.duplicated(subset=["ds"]).any():
-        st.warning("Atenção: Há duplicatas na coluna 'Data'. Removendo duplicatas...")
+        st.warning("⚠️ Atenção: Há duplicatas na coluna 'Data'. Removendo duplicatas...")
         df = df.drop_duplicates(subset=["ds"])
 
     # Treinar o modelo Prophet
@@ -63,31 +65,19 @@ def carregar_e_treinar_modelos():
     dias_ate_2026 = (data_final_desejada - ultima_data_df).days
 
     # Criar previsões do Prophet até o final de 2026
-    future = prophet.make_future_dataframe(
-        periods=dias_ate_2026
-    )  # Previsão até 31 de dezembro de 2026
+    future = prophet.make_future_dataframe(periods=dias_ate_2026)  # Previsão até 31 de dezembro de 2026
     prophet_future = prophet.predict(future)
 
     # Mesclar previsões do Prophet com o DataFrame original
-    df = df.merge(
-        prophet_future[["ds", "yhat", "yhat_lower", "yhat_upper"]], on="ds", how="left"
-    )
+    df = df.merge(prophet_future[["ds", "yhat", "yhat_lower", "yhat_upper"]], on="ds", how="left")
 
     # Verificar duplicatas após a mesclagem
     if df.duplicated(subset=["ds"]).any():
-        st.warning("Atenção: Há duplicatas após a mesclagem. Removendo duplicatas...")
+        st.warning("⚠️ Atenção: Há duplicatas após a mesclagem. Removendo duplicatas...")
         df = df.drop_duplicates(subset=["ds"])
 
     # Renomear as colunas de forma clara e estruturada
-    mapeamento_colunas = {
-        "ds": "Data",
-        "y": "Preço Real",
-        "yhat": "Preço Previsto",
-        "yhat_lower": "Intervalo Inferior",
-        "yhat_upper": "Intervalo Superior",
-    }
-
-    df.rename(columns=mapeamento_colunas, inplace=True)
+    df.rename(columns={"ds": "Data", "y": "Preço Real", "yhat": "Preço Previsto", "yhat_lower": "Intervalo Inferior", "yhat_upper": "Intervalo Superior"}, inplace=True)
 
     # Remover colunas duplicadas após a renomeação
     df = df.loc[:, ~df.columns.duplicated()]
@@ -109,24 +99,28 @@ def carregar_e_treinar_modelos():
 
     # Definir features e target para o XGBoost
     features = [f"Resíduo_Lag_{i}" for i in range(1, 8)]  # Usar os lags como features
-    X_train = train[features]
-    y_train = train["Resíduo"]
-    X_test = test[features]
-    y_test = test["Resíduo"]
+    X_train, y_train = train[features], train["Resíduo"]
+    X_test, y_test = test[features], test["Resíduo"]
 
     # Treinar o modelo XGBoost
-    model_xgb = xgb.XGBRegressor(
-        objective="reg:squarederror",
-        n_estimators=100,
-        learning_rate=0.1,
-        random_state=42,
-    )
+    model_xgb = xgb.XGBRegressor(objective="reg:squarederror", n_estimators=100, learning_rate=0.1, random_state=42)
     model_xgb.fit(X_train, y_train)
 
+    # Definir o diretório onde os modelos serão salvos
+    modelo_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modelo"))
+
+    # Criar diretório caso não exista
+    if not os.path.exists(modelo_dir):
+        os.makedirs(modelo_dir)
+
+    # Caminhos completos para os arquivos de modelo
+    modelo_prophet_path = os.path.join(modelo_dir, "modelo_prophet.pkl")
+    modelo_xgb_path = os.path.join(modelo_dir, "modelo_xgboost.pkl")
+
     # Salvar os modelos treinados
-    joblib.dump(prophet, "../modelo/modelo_prophet.pkl")  # Salvar o modelo Prophet
-    joblib.dump(model_xgb, "../modelo/modelo_xgboost.pkl")   # Salvar o modelo XGBoost
-    # st.success("Modelos salvos com sucesso!")
+    joblib.dump(prophet, modelo_prophet_path)
+    joblib.dump(model_xgb, modelo_xgb_path)
+    print(f"✅ Modelos salvos com sucesso em: {modelo_dir}")
 
     return df, prophet, model_xgb, test, prophet_future
 

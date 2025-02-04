@@ -11,14 +11,12 @@ def carregar_base_dados():
         response = requests.get(url, timeout=10)  # Timeout de 10 segundos para evitar travamento
 
         if response.status_code == 200:
-            # st.success("Página acessada com sucesso.")
             soup = BeautifulSoup(response.content, "html.parser")
 
             # Procurar a tabela na página
             table = soup.find("table", {"class": "dxgvTable"})
 
             if table:
-                # st.success("Tabela encontrada, iniciando o carregamento...")
                 df = pd.read_html(str(table))[0]
                 df.columns = ["Data", "Preço (US$)"]
 
@@ -31,6 +29,16 @@ def carregar_base_dados():
                 df = df[(df["Data"] >= "2005-01-01") & (df["Data"] <= "2025-12-31")]
                 df.reset_index(drop=True, inplace=True)
 
+                # Criar diretório "dados/" se não existir
+                diretorio_dados = "dados"
+                if not os.path.exists(diretorio_dados):
+                    os.makedirs(diretorio_dados)
+
+                # Salvar o arquivo CSV no diretório "dados/"
+                caminho_arquivo = os.path.join(diretorio_dados, "dados_petroleo_brent_2005_2025.csv")
+                df.to_csv(caminho_arquivo, index=False, encoding="utf-8")
+                st.success(f"✅ Dados salvos em {caminho_arquivo}")
+
                 return df
 
             else:
@@ -41,13 +49,14 @@ def carregar_base_dados():
 
     except Exception as e:
         # Se ocorrer um erro, tenta carregar o arquivo local
-        st.error(f"Erro ao acessar a API: {e}")
+        st.error(f"❌ Erro ao acessar a API: {e}")
         try:
-            df = pd.read_csv("dados/dados_petroleo_brent_2005_2025.csv")
-            st.warning("Carregando dados do arquivo local.")
+            caminho_arquivo_local = os.path.join("dados", "dados_petroleo_brent_2005_2025.csv")
+            df = pd.read_csv(caminho_arquivo_local)
+            st.warning("⚠️ Carregando dados do arquivo local.")
             return df
         except FileNotFoundError:
-            st.error("Erro: O arquivo local não foi encontrado.")
+            st.error("❌ Erro: O arquivo local não foi encontrado.")
             return None
 
 # # Executar a função
