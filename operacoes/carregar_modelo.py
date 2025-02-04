@@ -135,10 +135,18 @@ def criar_tabela_previsoes(data_inicio, dias_futuros, df_inicial):
     :param dias_futuros: Número de dias para prever no futuro.
     :param df_inicial: DataFrame inicial com os dados históricos.
     :return: DataFrame com as previsões.
-    """
+    # Obter o diretório do script atual"""
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modelo"))
+
+
+    modelo_prophet_path = os.path.join(base_dir, "modelo_prophet.pkl")
+    modelo_xgb_path = os.path.join(base_dir, "modelo_xgboost.pkl")
+
+
     # Carregar os modelos salvos
-    prophet = joblib.load("../modelo/modelo_prophet.pkl")
-    model_xgb = joblib.load("../modelo/modelo_xgboost.pkl")
+    # Carregar os modelos
+    prophet = joblib.load(modelo_prophet_path)
+    model_xgb = joblib.load(modelo_xgb_path)
 
     # Criar DataFrame com as datas futuras
     datas_futuras = pd.date_range(start=data_inicio, periods=dias_futuros, freq="D")
