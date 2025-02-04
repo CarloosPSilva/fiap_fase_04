@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 import pandas as pd
-
+import threading
 
 from operacoes.app_estrategia_deploy import detalhe_deploy
 from operacoes.app_modelo_previsao import modelo_de_previsao
@@ -50,6 +50,17 @@ st.sidebar.markdown("---")
 
 
 st.sidebar.image("imagens/rb_50948.png")
+
+# 🔹 Inicializa a Previsão Automaticamente (Assíncrono)
+def carregar_modelo():
+    with st.spinner("🔄 Carregando modelo de previsão... Isso pode levar alguns segundos."):
+        if "previsao_carregada" not in st.session_state:
+            modelo_de_previsao()
+            st.session_state["previsao_carregada"] = True
+
+# 🔹 Inicia a carga do modelo em paralelo
+if "previsao_carregada" not in st.session_state:
+    threading.Thread(target=carregar_modelo).start()
 
 
 # Menu de navegação
