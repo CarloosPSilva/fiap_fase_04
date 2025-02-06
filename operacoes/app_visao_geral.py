@@ -19,7 +19,7 @@ def visao_geral():
     st.markdown("---")
 
     # 🔹 Contexto do Problema
-    st.markdown("## **O Problema**")
+    st.markdown("## **O Desafio:**")
     st.markdown(
         """
         Fui contratado para atuar em um projeto de consultoria com o objetivo de analisar o preço do petróleo Brent.  
